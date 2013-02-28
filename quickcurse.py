@@ -1,4 +1,4 @@
-# Something strange is happening when scrolling, only allowing scroll through 2 list items. When scrolling up, the description doesn't change.   
+# Something strange is happening when scrolling, only allowing scroll through 2 list items. 
 import curses
 import curses.textpad
 import os
@@ -45,7 +45,7 @@ class stringbuffer:
 		self.stringdata = self.stringdata[:length - 1]
 
 
-def update_leftpane(create = False):
+def update_leftpane():
 	global list_of_items, files
 	leftpane.clear()
 	pos = 0
@@ -61,10 +61,6 @@ def update_leftpane(create = False):
 			else:
 				leftpane.addnstr(pos, 0, name, 25)
 			pos += 1
-#	if create and len(list_of_files):
-#		new_fd = open(path + "/" + phrase + ".txt", "w")
-#		new_fd.write("")
-
 	leftpane.refresh()
 
 
@@ -75,11 +71,7 @@ def update_rightpane():
 		name = list_of_items[list_pos]
 	else: name = "default"
 	if name in files:
-		rightpane.addstr(0, 0, files[name])
-	else: 
-		fd_being_slurped = open(path + "/" + name)
-		files[name] = fd_being_slurped.read()
-		rightpane.addstr(0, 0, files[name])
+		rightpane.addstr(0, 0, debug() + files[name])
 	rightpane.refresh()
 
 def update_topbar():
@@ -95,7 +87,7 @@ def notdotfile(name):
 	else:
 		return True
 
-def get_command():
+def get_command(): # These two functions are unnecessarily fancy. "Get" prints a command prompt and waits for a key, "Show" prints the command and waits for enter or cancelation.
 	topbar.clear()
 	topbar.addstr(0, 0, "command: ")
 	topbar.refresh()
@@ -118,20 +110,20 @@ def show_command(command):
 	else:
 		return False
 
+def debug():
+	debug_text = "(File table length: " + str(len(files)) + ") (list_pos: " + str(list_pos) + ") (list_of_items length: " + str(len(list_of_items)) + ")\n\n"
+	return debug_text
+
 phrase = stringbuffer()
-update_topbar()
-update_leftpane()
-update_rightpane()
 
 #This is the main event loop.
 while True:
-	update_leftpane(True)
+	update_leftpane()
 	update_rightpane()
 	list_pos = 0
 	if focus == "right":
 		pass
 	if focus == "left":
-		curses.napms(40)
 		key = leftpane.getch()
 		if key == curses.KEY_DOWN:
 			if list_pos < len(list_of_items) - 2 :
